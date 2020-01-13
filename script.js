@@ -1,10 +1,17 @@
+// author: jotaro shigeyama,2020
+let sensorNoise = 10;
+let robot, battleField;
+
 function setup() {
     createCanvas(710, 400);
-    // Create object
+    // Create robot and battlefield.
     battleField = new BattleField(random(width), random(height));
     robot = new Robot(random(width), random(height));
+    setSensors();
+}
 
-    //TODO1: YOUR SENSOR SETUP HERE
+function setSensors() {
+    //TODO1: YOUR SENSOR SETUP HERE. YOU CAN SET AS MANY SENSORS AS YOU WISH (sensor position is relative to the robot's center)
     robot.set_sensor(20, 0); //sensor[0]
     robot.set_sensor(-10, -20);
     robot.set_sensor(-10, 20); //sensor[2]
@@ -14,23 +21,46 @@ function draw() {
     background(255);
     battleField.draw();
 
-    //TODO2: YOUR ROBOT LOGIC HERE
+    //TODO2: YOUR ROBOT LOGIC HERE. USE moveForward() and rotateRight() or rotateLeft()
     {
-        sensors = robot.get_sensor_values_at_BF(battleField);
-
+        //TODO3: below function returns 0, 1, 2 as color at the field.
+        //if you change the function as get_sensor_values_at_BF(battleField) then it will return sensor values with noise.
+        //the sensor value now returns gaussian noise with mean - (100,200,300) and std sensorNoise.
+        //you can increase / decrease sensorNoise with up,down arrow key.
+        sensors = robot.get_color_values_at_BF(battleField);
         //example
-        if(sensors[1]==1){
+        if (sensors[1] == 1) {
             robot.moveForward();
+        } else {
+            robot.rotateRight(0.01); //unit:radian
         }
-        else{
-            robot.rotateRight(0.01);
-        }
+        fill(255, 0, 0);
+
+        //TODO4: use debug text if you need.
+        text("you can set some debug message here", 10, 20);
+        text("Sensor noise is set to " + sensorNoise.toString(), 10, height - 20);
     }
-
-
     robot.draw();
-    // console.log(battleField.get_color_at_point(mouseX, mouseY));
 }
+
+function keyPressed() {
+    if (keyCode === UP_ARROW) {
+        sensorNoise += 10;
+    } else if (keyCode === DOWN_ARROW) {
+        sensorNoise -= 10;
+        sensorNoise = max(0, sensorNoise);
+    }
+}
+
+function mouseClicked() {
+    robot = new Robot(mouseX, mouseY);
+    setSensors();
+}
+
+
+///////////////////////////////////////////////////////////////
+/////// YOU CAN HELP JOTARO MAKE BELOW CODE BETTER :)
+///////////////////////////////////////////////////////////////
 
 function rotate_(cx, cy, x, y, angle) {
     var radians = -angle,
@@ -59,10 +89,10 @@ class Robot {
             s.y += step * sin(this.rotation);
         }
     }
-    rotateRight(r){
+    rotateRight(r) {
         this.rotate(r);
     }
-    rotateLeft(r){
+    rotateLeft(r) {
         this.rotate(-r);
     }
     rotate(rotation) {
@@ -81,22 +111,26 @@ class Robot {
         }
         strokeWeight(5);
         stroke(2, 87, 114);
-        line(this.x + this.diameter / 2 * cos(this.rotation), 
-             this.y + this.diameter / 2 * sin(this.rotation),
-             this.x + (10 + this.diameter / 2) * cos(this.rotation),
-             this.y + (10 + this.diameter / 2) * sin(this.rotation));
+        line(this.x + this.diameter / 2 * cos(this.rotation),
+            this.y + this.diameter / 2 * sin(this.rotation),
+            this.x + (10 + this.diameter / 2) * cos(this.rotation),
+            this.y + (10 + this.diameter / 2) * sin(this.rotation));
 
     }
     set_sensor(x, y) {
         let s = new Sensor(this.x + x, this.y + y);
         this.sensors.push(s);
     }
-    get_sensor_values_at_BF(battleField) {
+    get_color_values_at_BF(battleField) {
         let res = [];
         for (let s of this.sensors) {
             res.push(battleField.get_color_at_point(s.x, s.y));
         }
         return res;
+    }
+    get_sensor_values_at_BF(battleField) {
+        let val = get_color_values_at_BF(battleField);
+        res = max(0, randomGaussian((val + 1) * 100, sensorNoise));
     }
 }
 
@@ -130,8 +164,8 @@ class BattleField {
             let d = this.diameter / this.num_circle;
             this.switch_color();
             strokeWeight(0);
-            ellipse(this.cx, this.cy, 
-                    this.diameter - d * i, this.diameter - d * i)
+            ellipse(this.cx, this.cy,
+                this.diameter - d * i, this.diameter - d * i)
         }
     }
     switch_color() {
@@ -154,8 +188,8 @@ class BattleField {
         }
     }
     get_color_at_point(px, py) {
-        let d = sqrt((px - this.cx) * (px - this.cx) + 
-                     (py - this.cy) * (py - this.cy));
+        let d = sqrt((px - this.cx) * (px - this.cx) +
+            (py - this.cy) * (py - this.cy));
         let t = this.diameter / this.num_circle / 2;
         let r = d / t;
         return parseInt(3 - r % 3);
