@@ -129,8 +129,12 @@ class Robot {
         return res;
     }
     get_sensor_values_at_BF(battleField) {
-        let val = get_color_values_at_BF(battleField);
-        res = max(0, randomGaussian((val + 1) * 100, sensorNoise));
+        let res = [];
+        for (let s of this.sensors) {
+            let val =battleField.get_color_at_point(s.x, s.y);
+            res.push(max(0, randomGaussian((val + 1) * 100, sensorNoise)));
+        }
+        return res;
     }
 }
 
