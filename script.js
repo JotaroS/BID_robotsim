@@ -52,10 +52,10 @@ function keyPressed() {
     } else if (keyCode === DOWN_ARROW) {
         sensorNoise -= 10;
         sensorNoise = max(0, sensorNoise);
-    }else if (keyCode === RIGHT_ARROW) {
+    } else if (keyCode === RIGHT_ARROW) {
         drivingNoise += 1;
         drivingNoise = max(0, drivingNoise);
-    }else if (keyCode === LEFT_ARROW) {
+    } else if (keyCode === LEFT_ARROW) {
         drivingNoise -= 1;
         drivingNoise = max(0, drivingNoise);
     }
@@ -97,8 +97,8 @@ class Robot {
             s.x += step * cos(this.rotation);
             s.y += step * sin(this.rotation);
         }
-        if(drivingNoise > 0){
-            let noise = randomGaussian(0,drivingNoise);
+        if (drivingNoise > 0) {
+            let noise = randomGaussian(0, drivingNoise);
             this.rotate(noise * 3.1415 / 180);
         }
     }
@@ -144,7 +144,7 @@ class Robot {
     get_sensor_values_at_BF(battleField) {
         let res = [];
         for (let s of this.sensors) {
-            let val =battleField.get_color_at_point(s.x, s.y);
+            let val = battleField.get_color_at_point(s.x, s.y);
             res.push(max(0, randomGaussian((val + 1) * 100, sensorNoise)));
         }
         return res;
