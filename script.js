@@ -1,5 +1,6 @@
 // author: jotaro shigeyama,2020
-let sensorNoise = 10;
+let sensorNoise = 10; //up and down arrow
+let drivingNoise = 0; //right and left arrow
 let robot, battleField;
 
 function setup() {
@@ -27,18 +28,20 @@ function draw() {
         //if you change the function as get_sensor_values_at_BF(battleField) then it will return sensor values with noise.
         //the sensor value now returns gaussian noise with mean - (100,200,300) and std sensorNoise.
         //you can increase / decrease sensorNoise with up,down arrow key.
-        sensors = robot.get_color_values_at_BF(battleField);
+        sensors = robot.get_sensor_values_at_BF(battleField);
         //example
-        if (sensors[1] == 1) {
-            robot.moveForward();
-        } else {
-            robot.rotateRight(0.01); //unit:radian
-        }
+        // if (sensors[1] == 1) {
+        //     robot.moveForward();
+        // } else {
+        //     robot.rotateRight(0.01); //unit:radian
+        // }
+        robot.moveForward();
         fill(255, 0, 0);
 
         //TODO4: use debug text if you need.
         text("you can set some debug message here", 10, 20);
         text("Sensor noise is set to " + sensorNoise.toString(), 10, height - 20);
+        text("Driving noise is set to " + drivingNoise.toString(), 10, height - 10);
     }
     robot.draw();
 }
@@ -49,6 +52,12 @@ function keyPressed() {
     } else if (keyCode === DOWN_ARROW) {
         sensorNoise -= 10;
         sensorNoise = max(0, sensorNoise);
+    }else if (keyCode === RIGHT_ARROW) {
+        drivingNoise += 1;
+        drivingNoise = max(0, drivingNoise);
+    }else if (keyCode === LEFT_ARROW) {
+        drivingNoise -= 1;
+        drivingNoise = max(0, drivingNoise);
     }
 }
 
@@ -87,6 +96,10 @@ class Robot {
         for (let s of this.sensors) {
             s.x += step * cos(this.rotation);
             s.y += step * sin(this.rotation);
+        }
+        if(drivingNoise > 0){
+            let noise = randomGaussian(0,drivingNoise);
+            this.rotate(noise * 3.1415 / 180);
         }
     }
     rotateRight(r) {
